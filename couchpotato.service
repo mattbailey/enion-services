@@ -1,0 +1,26 @@
+[Unit]
+Description=Couchpotato
+Requires=docker.service
+Requires=data.service
+Requires=sabnzbd.service
+After=sabnzbd.service
+After=data.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run -t \
+         --rm \
+         --name %p \
+         -v /var/share/config/couchpotato:/config \
+         --volumes-from data \
+         -p 5050:5050 \
+         --link sabnzbd:sabnzbd \
+         mattbailey/docker-couchpotato
+ExecStop=-/usr/bin/docker kill %p
+
+[Install]
+WantedBy=multi-user.target

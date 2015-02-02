@@ -1,0 +1,26 @@
+[Unit]
+Description=Sickbeard
+Requires=docker.service
+Requires=data.service
+Requires=sabnzbd.service
+After=sabnzbd.service
+After=data.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run \
+         --rm \
+         --name %p \
+         -v /var/share/config/%p:/config \
+         --volumes-from data \
+         --link sabnzbd:sabnzbd \
+         -p 8081:8081 \
+         timhaak/sickbeard
+ExecStop=-/usr/bin/docker stop %p
+
+[Install]
+WantedBy=multi-user.target

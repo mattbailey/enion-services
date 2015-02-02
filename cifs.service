@@ -1,0 +1,27 @@
+[Unit]
+Description=CIFS
+Requires=docker.service
+Requires=data.service
+After=data.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run -t \
+  --name %p \
+  -p 139:139 \
+  -p 445:445 \
+  -e cifsuser=root \
+  -e cifsgroup=root \
+  --volumes-from data \
+  mattbailey/cifs \
+  enion enion \
+  /data:data:rw \
+  /downloads:downloads:rw
+ExecStop=-/usr/bin/docker kill %p
+
+[Install]
+WantedBy=multi-user.target

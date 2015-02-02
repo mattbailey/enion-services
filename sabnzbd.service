@@ -1,0 +1,23 @@
+[Unit]
+Description=Sabnzbd
+Requires=docker.service
+Requires=data.service
+After=data.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=5
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run -t \
+         --rm \
+         --name sabnzbd \
+         -v /var/share/config/sabnzbd:/config \
+         --volumes-from data \
+         -p 8080:8080 \
+         mattbailey/docker-sabnzbd
+ExecStop=-/usr/bin/docker kill %p
+
+[Install]
+WantedBy=multi-user.target

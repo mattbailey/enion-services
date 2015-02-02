@@ -1,0 +1,35 @@
+[Unit]
+Description=Nginx
+Requires=docker.service
+Requires=couchpotato.service
+Requires=sickbeard.service
+Requires=sabnzbd.service
+After=couchpotato.service
+After=sickbeard.service
+After=sabnzbd.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStartPre=/usr/bin/docker pull dockerfile/nginx
+ExecStart=/usr/bin/docker run -t \
+         --rm \
+         --name nginx \
+         -v /var/share/config/nginx/htpasswd:/etc/nginx/htpasswd:ro \
+         -v /var/share/config/nginx/proxy.conf:/etc/nginx/proxy.conf:ro \
+         -v /var/share/config/nginx/sites-enabled:/etc/nginx/sites-enabled \
+         -v /var/share/config/nginx/log:/var/log/nginx \
+         -v /var/share/config/nginx/certs:/etc/nginx/certs \
+         -p 80:80 \
+         -p 443:443 \
+         --link couchpotato:couchpotato \
+         --link sickbeard:sickbeard \
+         --link sabnzbd:sabnzbd \
+         dockerfile/nginx
+ExecStop=-/usr/bin/docker kill %p
+
+[Install]
+WantedBy=multi-user.target

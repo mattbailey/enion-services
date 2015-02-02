@@ -1,0 +1,22 @@
+[Unit]
+Description=Data Container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run -t \
+         --rm \
+         --name data \
+         -v /var/share/data/alpha:/data \
+         -v /var/share/data/downloads:/downloads \
+         -v /var/share/data/syncthing:/Sync \
+         -v /var/share/config/syncthing:/Config \
+         mattbailey/data /bin/sh
+ExecStop=-/usr/bin/docker kill %p
+
+[Install]
+WantedBy=multi-user.target

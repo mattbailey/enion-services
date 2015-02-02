@@ -1,0 +1,26 @@
+[Unit]
+Description=syncthing
+Requires=docker.service
+Requires=data.service
+After=data.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run -t \
+  --rm \
+  --name %p \
+  -p 8888:8080 \
+  -p 22000:22000 \
+  -e VERSION=0.10.20 \
+  -e USER_UID=1000 \
+  -e USER_GID=1000 \
+  --volumes-from data \
+  johnae/docker-syncthing
+ExecStop=-/usr/bin/docker kill %p
+
+[Install]
+WantedBy=multi-user.target

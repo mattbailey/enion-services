@@ -1,0 +1,26 @@
+[Unit]
+Description=Plex
+Requires=docker.service
+Requires=data.service
+Requires=network.target
+After=data.service
+After=docker.service
+After=network.target
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run -t \
+  --net="host" \
+  --rm \
+  -p 32400:32400 \
+  --name %p \
+  --volumes-from data \
+  -v /var/share/config/plex:/config \
+  mattbailey/plex
+ExecStop=-/usr/bin/docker kill %p
+
+[Install]
+WantedBy=multi-user.target
