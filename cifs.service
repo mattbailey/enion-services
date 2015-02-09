@@ -18,7 +18,7 @@ ExecStart=/usr/bin/docker run -t \
   -e cifsuser=root \
   -e cifsgroup=root \
   --volumes-from data \
-  mattbailey/cifs \
+  mattbailey/docker-cifs \
   enion enion \
   /data:data:rw \
   /downloads:downloads:rw
