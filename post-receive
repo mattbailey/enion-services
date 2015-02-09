@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Get stdin
+read stdin
+
+# Debug
+set -e
+set -x
+
+# Format for git diff
+refs=$(echo $stdin | awk '{print $1 ".." $2}')
+
+# Get list of changed service files
+changed=$(git diff --name-only ${refs} | grep "\.service")
+
+# Reload systemd to pick up changes
+sudo systemctl daemon-reload
+
+# Bounce it!
+cd ..
+for file in $changed; do
+  sudo systemctl restart $file
+done
